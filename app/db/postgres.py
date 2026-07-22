@@ -65,7 +65,7 @@ def initialize_database():
     # Create sales table with foreign keys.
     cur.execute(
         """
-        CREATE TABLE sales (
+        CREATE TABLE IF NOT EXISTS sales (
             id SERIAL PRIMARY KEY,
             sale_date DATE NOT NULL,
             product_id INTEGER NOT NULL REFERENCES products(id),

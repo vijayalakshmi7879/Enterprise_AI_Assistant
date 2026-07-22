@@ -182,7 +182,12 @@ def run_sql_query(sql: str) -> pd.DataFrame:
 
     conn = get_db_connection()
     try:
-        df = pd.read_sql_query(sql, conn)
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            rows = cur.fetchall()
+            columns = [desc[0] for desc in cur.description]
+
+        df = pd.DataFrame(rows, columns=columns)
     finally:
         conn.close()
 
