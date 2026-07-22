@@ -1,0 +1,10 @@
+google-generativeai
+groq
+gradio
+pandas
+tabulate
+chromadb
+pypdf
+sentence-transformers
+python-dotenv
+psycopg2-binary
