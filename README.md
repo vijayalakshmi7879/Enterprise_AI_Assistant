@@ -4,7 +4,7 @@ An end‑to‑end AI assistant for enterprise use cases combining:
 
 - A **SQL Agent** that converts natural language questions into safe PostgreSQL queries.
 - A **Knowledge (RAG) Agent** that answers policy and document questions using uploaded PDFs.
-- A **Gradio UI** that provides a simple chat interface for business users. [file:1][web:82]
+- A **Gradio UI** that provides a simple chat interface for business users.
 
 Repo: https://github.com/vijayalakshmi7879/Enterprise_AI_Assistant
 
@@ -20,17 +20,17 @@ This project is designed with security, safety, and development best practices i
   - Read‑only queries only (`SELECT` / `WITH`), with strict validation and safety filters.
   - Hybrid mode:
     - Hand‑crafted SQL templates (fallback) for key metrics (April sales, highest revenue product, sales by month, total revenue).
-    - Groq LLM (`llama-3.3-70b-versatile`) for ad‑hoc, exploratory SQL questions (`Mode: groq`). [file:1][web:68][web:29]
+    - Groq LLM (`llama-3.3-70b-versatile`) for ad‑hoc, exploratory SQL questions (`Mode: groq`).
 
 - **RAG / Knowledge Agent**
 
   - Upload internal PDF documents (e.g., HR policies).
   - Chunk, embed, and store in a Chroma vector database.
-  - Answer questions like “How many casual leaves can an employee take?” with citations back to specific pages. [file:1][web:23]
+  - Answer questions like “How many casual leaves can an employee take?” with citations back to specific pages.
 
 - **Gradio UI**
 
-  - Single chat interface where the Manager Agent routes questions either to the SQL Agent or the Knowledge Agent. [file:1][web:82]
+  - Single chat interface where the Manager Agent routes questions either to the SQL Agent or the Knowledge Agent.
 
 ---
 
@@ -101,7 +101,7 @@ sequenceDiagram
     end
 ```
 
-- **Security:** `validate_safe_sql` rejects non‑read‑only queries, multiple statements, and dangerous keywords before anything hits the database. [file:1][web:75]
+- **Security:** `validate_safe_sql` rejects non‑read‑only queries, multiple statements, and dangerous keywords before anything hits the database.
 
 ---
 
@@ -123,7 +123,7 @@ sequenceDiagram
     K->>U: Answer + citations (document, page)
 ```
 
-- Uploaded PDFs are stored on disk and indexed in `vectordb/` with sentence‑transformer embeddings. [file:1][web:23]
+- Uploaded PDFs are stored on disk and indexed in `vectordb/` with sentence‑transformer embeddings.
 
 ---
 
@@ -145,7 +145,7 @@ Create a `docs/images/` folder and add UI screenshots, then reference them like:
 
 ```
 
-These will help reviewers quickly understand how the app looks and behaves. [web:79][web:83]
+These will help reviewers quickly understand how the app looks and behaves.
 
 ---
 
@@ -153,7 +153,7 @@ These will help reviewers quickly understand how the app looks and behaves. [web
 
 ### Secrets and Configuration
 
-- All secrets (Groq API key, DB credentials) are loaded from environment variables via `Config`, not hard‑coded. [file:1]
+- All secrets (Groq API key, DB credentials) are loaded from environment variables via `Config`, not hard‑coded.
 - `.env` is **ignored** via `.gitignore`, and not committed to the public repo.
 - Provide `.env.example` with placeholders:
 
@@ -166,7 +166,7 @@ These will help reviewers quickly understand how the app looks and behaves. [web
   DB_PASSWORD=your_db_password_here
   ```
 
-  so reviewers know how to configure it without seeing real secrets. [web:30]
+  so reviewers know how to configure it without seeing real secrets.
 
 ### Database Safety
 
@@ -175,22 +175,22 @@ These will help reviewers quickly understand how the app looks and behaves. [web
   - `validate_safe_sql` enforces:
     - Query must start with `SELECT` or `WITH`.
     - No `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `CREATE`, `TRUNCATE`, `ATTACH`, `DETACH`, `PRAGMA`, `REPLACE`.
-    - No multiple statements separated by `;`. [file:1]
+    - No multiple statements separated by `;`.
 
 - PostgreSQL schema:
 
   - `products(id, name, category, price)`
   - `customers(id, name, city)`
-  - `sales(id, sale_date, product_id, customer_id, quantity, total_amount)` [file:1]
+  - `sales(id, sale_date, product_id, customer_id, quantity, total_amount)`
 
 - `run_sql_query`:
 
-  - Uses `conn.cursor()`, `fetchall()`, and builds a pandas `DataFrame` from `rows` and `columns`, avoiding unsupported DBAPI behaviours. [file:1][web:26]
+  - Uses `conn.cursor()`, `fetchall()`, and builds a pandas `DataFrame` from `rows` and `columns`, avoiding unsupported DBAPI behaviours. 
 
 For a more production‑grade setup, reviewers could:
 
 - Use a **read‑only DB user** just for this app.
-- Restrict that user to the required schema/tables. [web:39][web:40]
+- Restrict that user to the required schema/tables.
 
 ### LLM and RAG Safety
 
@@ -198,12 +198,12 @@ For a more production‑grade setup, reviewers could:
 
   - Exact schema.
   - Rules to generate a **single read‑only query** only.
-  - Guidance to stick to PostgreSQL syntax. [file:1][web:29]
+  - Guidance to stick to PostgreSQL syntax.
 
 - RAG answers:
 
   - Always include citations (document + page).
-  - Are based on retrieved text from the PDFs, not arbitrary hallucinations. [file:1]
+  - Are based on retrieved text from the PDFs, not arbitrary hallucinations.
 
 ### Error Handling and Logging
 
@@ -211,7 +211,7 @@ For a more production‑grade setup, reviewers could:
 
   > `SQL Agent could not process your question right now.`
 
-- Runtime data (`logs/`, `uploaded_pdfs/`, `vectordb/`, `database/`, `__pycache__/`) is ignored via `.gitignore` and no longer tracked in Git, to prevent accidental leakage of user data or internal artefacts. [file:1][web:30]
+- Runtime data (`logs/`, `uploaded_pdfs/`, `vectordb/`, `database/`, `__pycache__/`) is ignored via `.gitignore` and no longer tracked in Git, to prevent accidental leakage of user data or internal artefacts. 
 
 ### Project Structure
 
@@ -227,7 +227,7 @@ From `tree`:
   - `main.py`
   - `docker-compose.yml`
   - `requirements.txt`
-  - `README.md`, `LICENSE` [file:1]
+  - `README.md`, `LICENSE`
 
 This makes it clear where to look for:
 
@@ -255,7 +255,7 @@ This makes it clear where to look for:
 
    Fill in:
 
-   - `GROQ_API_KEY` (from Groq console). [web:73]
+   - `GROQ_API_KEY` (from Groq console).
    - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
 
 3. **Start PostgreSQL via Docker**
@@ -281,7 +281,7 @@ This makes it clear where to look for:
 
 6. **Open the UI**
 
-   - Visit the URL printed by Gradio (typically `http://127.0.0.1:7860`) to interact with the assistant. [web:82]
+   - Visit the URL printed by Gradio (typically `http://127.0.0.1:7860`) to interact with the assistant.
 
 ---
 
@@ -292,13 +292,13 @@ This makes it clear where to look for:
   - `Show me the sales of April month` → Mode: fallback, April summary.
   - `Which product generated highest value?` → Mode: fallback, highest revenue product.
   - `Show me the sales in June month` → Mode: groq, June rows.
-  - `Show total revenue by customer` → Mode: groq, per‑customer totals. [file:1][web:23]
+  - `Show total revenue by customer` → Mode: groq, per‑customer totals.
 
 - **Knowledge Agent**
 
   - `How many casual leaves can an employee take?`
   - `What is the remote work policy?`  
-    → Answers with citations like `HR_Policy_1_.pdf, page 1/2`. [file:1]
+    → Answers with citations like `HR_Policy_1_.pdf, page 1/2`.
 
 ---
 
