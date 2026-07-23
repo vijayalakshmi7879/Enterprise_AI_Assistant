@@ -141,15 +141,16 @@ Create a `docs/images/` folder and add UI screenshots, then reference them like:
 ```markdown
 ### Gradio Chat UI
 
+![Gradio Chat UI](docs/images/gradio-chat-ui.png)
 
 
 ### SQL Agent April Sales
 
-
+![SQL Agent April Sales](docs/images/sql-agent-april-sales-screen1.png)
 
 ### Knowledge Agent HR Policy
 
-
+![Knowledge Agent HR Policy](docs/images/knowledge-agent-hr-policy-casualleaves.png)
 ```
 
 These will help reviewers quickly understand how the app looks and behaves.
