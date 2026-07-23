@@ -147,6 +147,7 @@ Create a `docs/images/` folder and add UI screenshots, then reference them like:
 ### SQL Agent April Sales
 
 ![SQL Agent April Sales](docs/images/sql-agent-april-sales-screen1.png)
+![SQL Agent April Sales](docs/images/sql-agent-april-sales-screen2.png)
 
 ### Knowledge Agent HR Policy
 
