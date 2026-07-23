@@ -220,9 +220,10 @@ def generate_sql_from_question(user_question: str) -> Tuple[str, str]:
             temperature=0,
         )
 
-        sql = clean_sql_output(completion.choices.message.content)
+        sql = clean_sql_output(completion.choices[0].message.content)
         return sql, "groq"
     except Exception as e:
+        print("SQL generation error:", repr(e))
         log_event("sql_generation_error", {"error": str(e)})
         if fallback_sql:
             return fallback_sql, "fallback"
