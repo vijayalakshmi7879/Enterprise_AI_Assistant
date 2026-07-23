@@ -39,24 +39,11 @@ This project is designed with security, safety, and development best practices i
 ```mermaid
 flowchart LR
     U[User] --> M[Manager Agent]
-    M -->|Sales / data questions| S[SQL Agent]
-    M -->|Policy / document questions| K[Knowledge Agent (RAG)]
+    M --> S[SQL Agent]
+    M --> K[Knowledge Agent (RAG)]
     S --> P[PostgreSQL]
     K --> V[Chroma Vector DB]
     K --> D[Uploaded PDFs]
-```
-    subgraph App
-        M
-        S
-        K
-        UI[Gradio App]
-    end
-
-    subgraph Infra
-        P
-        V
-        D
-    end
 ```
 - **Manager Agent** decides whether a query is better answered from structured sales data or from policy documents.
 - **SQL Agent** generates safe SQL, runs it against PostgreSQL, and explains results.
