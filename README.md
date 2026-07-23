@@ -151,6 +151,12 @@ Create a `docs/images/` folder and add UI screenshots, then reference them like:
 
 [View Knowledge Agent HR Policy screenshot](docs/images/knowledge-agent-hr-policy-casualleaves.png)
 
+## Test Documents
+
+Sample input documents used by the Knowledge Agent are stored in `docs/test_documents`.
+
+- [HR Policy sample PDF](docs/test_documents/HR_Policy(1).pdf)
+
 These will help reviewers quickly understand how the app looks and behaves.
 ---
 
