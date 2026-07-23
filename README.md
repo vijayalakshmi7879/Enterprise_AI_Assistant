@@ -138,7 +138,6 @@ sequenceDiagram
 
 Create a `docs/images/` folder and add UI screenshots, then reference them like:
 
-```markdown
 ### Gradio Chat UI
 
 [![Gradio Chat UI](docs/images/gradio-chat-ui.png)](docs/images/gradio-chat-ui.png)
@@ -152,7 +151,6 @@ Create a `docs/images/` folder and add UI screenshots, then reference them like:
 ### Knowledge Agent HR Policy
 
 [![Knowledge Agent HR Policy](docs/images/knowledge-agent-hr-policy-casualleaves.png)](docs/images/knowledge-agent-hr-policy-casualleaves.png)
-```
 
 These will help reviewers quickly understand how the app looks and behaves.
 
