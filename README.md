@@ -1,109 +1,270 @@
-# Enterprise AI Assistant (Unified Agents)
+# Enterprise AI Assistant
 
-This project is a modular, production-style Python application that combines multiple AI agents into a single unified assistant:
+An end‑to‑end AI assistant for enterprise use cases combining:
 
-- **Knowledge Agent (RAG)** for HR policy / PDF questions
-- **SQL Agent (Text-to-SQL)** for business data questions
-- **Manager Agent** to route user queries to the right specialist
-- **Gradio UI** as a simple, user-friendly web interface
+- A **SQL Agent** that converts natural language questions into safe PostgreSQL queries.
+- A **Knowledge (RAG) Agent** that answers policy and document questions using uploaded PDFs.
+- A **Gradio UI** that provides a simple chat interface for business users. [file:1][web:82]
 
-It is designed to run entirely inside **GitHub Codespaces**, using a Python virtual environment, environment variables for secrets, and best practices for code organization.
+Repo: https://github.com/vijayalakshmi7879/Enterprise_AI_Assistant
+
+This project is designed with security, safety, and development best practices in mind, suitable for code review and extension.
 
 ---
 
 ## Features
 
-- **Multi-agent architecture**
-  - Manager Agent automatically routes questions to either the SQL Agent or the RAG Agent based on keywords.
-- **Knowledge Agent (RAG)**
-  - Upload HR policy PDFs.
-  - Build a Chroma-based vector knowledge base.
-  - Ask questions like _“How many casual leaves can an employee take?”_ with grounded answers and citations.
-- **SQL Agent (Text-to-SQL)**
-  - Uses a sample business SQLite database with `products`, `customers`, and `sales` tables.
-  - Generates SQL (via Groq, with safe fallbacks) for questions like _“Show me the sales of April”_ or _“Which product generated the highest revenue?”_.
-  - Enforces **read-only, safe SQL** (no DDL/DML).
-- **Unified Gradio UI**
-  - Single chat panel for all questions.
-  - Right panel for PDF upload, knowledge base building, and file previews.
+- **Text‑to‑SQL over PostgreSQL**
+
+  - Natural language queries like “Show me the sales of April month” or “Show total revenue by customer”.
+  - Read‑only queries only (`SELECT` / `WITH`), with strict validation and safety filters.
+  - Hybrid mode:
+    - Hand‑crafted SQL templates (fallback) for key metrics (April sales, highest revenue product, monthly sales, total revenue).
+    - Groq LLM (`llama-3.3-70b-versatile`) for ad‑hoc, exploratory SQL questions (`Mode: groq`). [file:1][web:68][web:29]
+
+- **RAG / Knowledge Agent**
+
+  - Upload internal PDF documents (e.g., HR policies).
+  - Chunk, embed, and store in a Chroma vector database.
+  - Answer questions like “How many casual leaves can an employee take?” with citations back to specific pages. [file:1][web:23]
+
+- **Gradio UI**
+
+  - Single chat interface where the Manager Agent routes questions either to the SQL Agent or the Knowledge Agent. [file:1][web:82]
 
 ---
 
-## Tech Stack
+## High‑Level Architecture
 
-- **Python 3.11+**
-- **Gradio** – Web UI
-- **SQLite** – Sample business database
-- **ChromaDB** – Vector store for RAG
-- **sentence-transformers** – Document embeddings
-- **Google Gemini** (`google-generativeai`) – RAG answer generation and tool routing
-- **Groq** (`groq`) – Text-to-SQL generation (optional; falls back to hand-written SQL)
+```mermaid
+flowchart LR
+    U[User in Gradio UI] --> M[Manager Agent]
 
----
+    M -->|Sales / data questions| S[SQL Agent]
+    M -->|Policy / document questions| K[Knowledge Agent (RAG)]
 
-## Project Structure
+    S --> P[PostgreSQL\nproducts/customers/sales]
+    K --> V[Chroma Vector DB\n(vectordb/)]
+    K --> D[Uploaded PDFs\n(uploaded_pdfs/)]
 
-```text
-enterprise-ai-assistant-new/
-├─ app/
-│  ├─ __init__.py
-│  ├─ config.py              # Paths, Config class, logging, app_state
-│  ├─ db/
-│  │  ├─ __init__.py
-│  │  └─ sqlite_db.py       # SQLite schema + seed data (products/customers/sales)
-│  ├─ agents/
-│  │  ├─ __init__.py
-│  │  ├─ manager.py         # Manager Agent routing logic + unified chat handler
-│  │  └─ sql_agent.py       # SQL Agent: Groq + fallbacks + safe execution + explanations
-│  ├─ rag/
-│  │  ├─ __init__.py
-│  │  ├─ pdf_utils.py       # PDF upload, preview, file summary
-│  │  ├─ vectordb.py        # Embedding model, Chroma collection, chunking, ingestion, retrieval
-│  │  └─ rag_agent.py       # RAG Agent: Gemini-based grounded answers + tool router
-│  └─ ui/
-│     ├─ __init__.py
-│     └─ gradio_app.py      # Gradio Blocks UI (chat + PDF controls)
-├─ main.py                  # Entry point to initialize DB and launch UI
-├─ requirements.txt
-├─ .gitignore
-├─ .env                     # Local secrets (ignored by Git)
-└─ README.md
+    subgraph App
+        M
+        S
+        K
+        UI[Gradio App]
+    end
+
+    subgraph Infra
+        P
+        V
+        D
+    end
 ```
 
+- **Manager Agent** decides whether a query is better answered from structured sales data or from policy documents.
+- **SQL Agent** generates safe SQL, runs it against PostgreSQL, and explains results.
+- **Knowledge Agent** retrieves relevant PDF chunks from the vector store and synthesizes answers with citations. [file:1][web:81][web:75]
+
 ---
 
-## Setup (GitHub Codespaces)
+## SQL Agent Flow
 
-1. **Open Codespace**
-   - From the GitHub repo, click **Code → Codespaces → Create codespace on main**.
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant M as Manager Agent
+    participant S as SQL Agent
+    participant G as Groq API
+    participant DB as PostgreSQL
 
-2. **Create and activate virtual environment**
+    U->>M: "Show me the sales of April month"
+    M->>S: Forward question
+    S->>S: Check fallback patterns
+    alt Matches fallback
+        S->>DB: Run hand‑crafted SQL (read‑only)
+        DB-->>S: Result rows
+        S->>U: Table + explanation (Mode: fallback)
+    else No fallback match
+        S->>G: Chat completion\n(model=llama-3.3-70b-versatile)
+        G-->>S: Generated SQL
+        S->>S: validate_safe_sql()
+        S->>DB: Run query
+        DB-->>S: Result rows
+        S->>U: Table + explanation (Mode: groq)
+    end
+```
 
-   In the Codespaces terminal:
+- **Security:** `validate_safe_sql` rejects non‑read‑only queries, multiple statements, and dangerous keywords before anything hits the database. [file:1][web:75]
+
+---
+
+## Knowledge (RAG) Agent Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant M as Manager Agent
+    participant K as Knowledge Agent
+    participant PDF as PDF Store
+    participant V as Vector DB
+
+    U->>M: "How many casual leaves can an employee take?"
+    M->>K: Forward question
+    K->>PDF: Ensure PDFs are processed
+    K->>V: Retrieve top‑K relevant chunks
+    V-->>K: Relevant text segments
+    K->>U: Answer + citations (document, page)
+```
+
+- Uploaded PDFs are stored on disk and indexed in `vectordb/` with sentence‑transformer embeddings. [file:1][web:23]
+
+---
+
+## Screenshots
+
+Create a `docs/images/` folder and add UI screenshots, then reference them like:
+
+```markdown
+### Gradio Chat UI
+
+
+
+### SQL Agent April Sales
+
+
+
+### Knowledge Agent HR Policy
+
+
+```
+
+These will help your reviewer quickly understand how the app looks and behaves. [web:79][web:83]
+
+---
+
+## Security, Safety, and Development Practices
+
+### Secrets and Configuration
+
+- All secrets (Groq API key, DB credentials) are loaded from environment variables via `Config`, not hard‑coded. [file:1]
+- `.env` is **ignored** via `.gitignore`, and not committed to the public repo.
+- Provide `.env.example` with placeholders:
+
+  ```env
+  GROQ_API_KEY=your_groq_key_here
+  DB_HOST=localhost
+  DB_PORT=5432
+  DB_NAME=enterprisesales
+  DB_USER=enterprisesales_user
+  DB_PASSWORD=your_db_password_here
+  ```
+
+  so reviewers know how to configure it without seeing real secrets. [web:30]
+
+### Database Safety
+
+- SQL Agent only runs **read‑only** queries:
+
+  - `validate_safe_sql` enforces:
+    - Query must start with `SELECT` or `WITH`.
+    - No `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `CREATE`, `TRUNCATE`, `ATTACH`, `DETACH`, `PRAGMA`, `REPLACE`.
+    - No multiple statements separated by `;`. [file:1]
+
+- PostgreSQL schema:
+
+  - `products(id, name, category, price)`
+  - `customers(id, name, city)`
+  - `sales(id, sale_date, product_id, customer_id, quantity, total_amount)` [file:1]
+
+- `run_sql_query`:
+
+  - Uses `conn.cursor()`, `fetchall()`, and builds a pandas `DataFrame` from `rows` and `columns`, avoiding unsupported DBAPI behaviours. [file:1][web:26]
+
+For a more production‑grade setup, reviewers could:
+
+- Use a **read‑only DB user** just for this app.
+- Restrict that user to the required schema/tables. [web:39][web:40]
+
+### LLM and RAG Safety
+
+- SQL generation prompt includes:
+
+  - Exact schema.
+  - Rules to generate a **single read‑only query** only.
+  - Guidance to stick to PostgreSQL syntax. [file:1][web:29]
+
+- RAG answers:
+
+  - Always include citations (document + page).
+  - Are based on retrieved text from the PDFs and not arbitrary hallucinations. [file:1]
+
+### Error Handling and Logging
+
+- Agents catch internal errors, log them via `log_event`, and return safe messages like:
+
+  > `SQL Agent could not process your question right now.`
+
+- Runtime data (`logs/`, `uploaded_pdfs/`, `vectordb/`, `database/`, `__pycache__/`) is ignored via `.gitignore` and no longer tracked in Git, to prevent accidental leakage of user data or internal artefacts. [file:1][web:30]
+
+### Project Structure
+
+From `tree`:
+
+- Core code:
+
+  - `app/agents/manager.py`, `app/agents/sql_agent.py`
+  - `app/db/postgres.py`, `app/db/sqlite_db.py` (legacy)
+  - `app/rag/pdf_utils.py`, `rag_agent.py`, `vectordb.py`
+  - `app/ui/gradio_app.py`
+  - `app/config.py`
+  - `main.py`
+  - `docker-compose.yml`
+  - `requirements.txt`
+  - `README.md`, `LICENSE` [file:1]
+
+This makes it clear where to look for:
+
+- Manager agent routing.
+- SQL Agent logic.
+- RAG logic.
+- UI.
+
+---
+
+## Setup and Running Locally
+
+1. **Clone the repo**
+
+   ```bash
+   git clone https://github.com/vijayalakshmi7879/Enterprise_AI_Assistant.git
+   cd Enterprise_AI_Assistant
+   ```
+
+2. **Create and fill `.env`**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Fill in:
+
+   - `GROQ_API_KEY` (from Groq console). [web:73]
+   - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
+
+3. **Start PostgreSQL via Docker**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Create virtual environment and install dependencies**
 
    ```bash
    python -m venv .venv
-   source .venv/bin/activate
-   ```
+   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 
-3. **Install dependencies**
-
-   ```bash
    pip install -r requirements.txt
    ```
-
-4. **Configure secrets in `.env`**
-
-   At the repo root, create/edit `.env`:
-
-   ```text
-   GOOGLE_API_KEY=your_real_gemini_key_here
-   GROQ_API_KEY=your_real_groq_key_here
-   ```
-
-   Notes:
-   - `.env` is **ignored** by `.gitignore` → keys are not committed.
-   - `app/config.py` uses `python-dotenv` to load these into `Config`.
 
 5. **Run the app**
 
@@ -111,79 +272,29 @@ enterprise-ai-assistant-new/
    python main.py
    ```
 
-   Codespaces will expose the Gradio app on a forwarded port (e.g. 7860). Click the port in the **Ports** panel to open the UI.
+6. **Open the UI**
+
+   - Visit the URL printed by Gradio (typically `http://127.0.0.1:7860`) to interact with the assistant. [web:82]
 
 ---
 
-## How to Use
+## Example Queries
 
-1. **Upload HR policy PDFs**
-   - Use the “Upload PDF” component on the right.
-   - After upload, click **“Build Knowledge Base”** to ingest and index the documents.
+- **SQL Agent**
 
-2. **Ask HR / policy questions (RAG)**
-   - Examples:
-     - `How many casual leaves can an employee take?`
-     - `How many sick leaves can an employee take?`
-   - The Knowledge Agent:
-     - Retrieves relevant chunks from Chroma.
-     - Uses Gemini to generate a grounded answer.
-     - Returns citations (filename + page).
+  - `Show me the sales of April month` → Mode: fallback, April summary.
+  - `Which product generated highest value?` → Mode: fallback, highest revenue product.
+  - `Show me the sales in June month` → Mode: groq, June rows.
+  - `Show total revenue by customer` → Mode: groq, per‑customer totals. [file:1][web:23]
 
-3. **Ask data / sales questions (SQL Agent)**
-   - Examples:
-     - `Show me the sales of April`
-     - `Which product generated the highest revenue?`
-     - `What is the total revenue?`
-   - The SQL Agent:
-     - Generates SQL via Groq, with safe fallback queries for common questions.
-     - Validates SQL as read-only (no `INSERT`, `UPDATE`, `DELETE`, etc.).
-     - Executes against the SQLite DB.
-     - Returns:
-       - SQL query
-       - Markdown result table
-       - Human-readable explanation (e.g. highest revenue product, April summary).
+- **Knowledge Agent**
 
-4. **Unified chat flow**
-   - The Manager Agent inspects each user message and routes it:
-     - To **SQL Agent** if it detects sales/database keywords.
-     - To **RAG Agent** if it detects HR/policy/document keywords.
-   - The chat history is maintained in `app_state["chat_history"]`.
+  - `How many casual leaves can an employee take?`
+  - `What is the remote work policy?`  
+    → Answers with citations like `HR_Policy_1_.pdf, page 1/2`. [file:1]
 
 ---
 
-## Security and Best Practices
+## License
 
-- **Secrets**:
-  - API keys are stored only in `.env` and read via environment variables.
-  - `.env` is excluded from version control via `.gitignore` and should not be committed.
-- **SQL safety**:
-  - `validate_safe_sql` enforces:
-    - Single statement only.
-    - Only `SELECT` or `WITH` queries.
-    - No mutating or DDL operations.
-- **File handling**:
-  - PDF filenames are sanitized to prevent path traversal.
-  - Uploaded PDFs, logs, and vector DB directories are created under the project root.
-
----
-
-## Next Steps
-
-Planned improvements for this project:
-
-- Migrate the business database from **SQLite** to **PostgreSQL** using a dedicated `app/db/postgres.py` module and updating `sql_agent.py` accordingly.
-- Add more explanation templates for different analytics questions (e.g., monthly breakdowns, top customers).
-- Enhance the UI styling, including dark mode and better layout for multi-agent responses.
-
----
-
-## Running Locally (Optional)
-
-If you want to run the project outside Codespaces:
-
-1. Clone the repo.
-2. Create and activate a virtual env (`python -m venv .venv`).
-3. Install requirements (`pip install -r requirements.txt`).
-4. Set `GOOGLE_API_KEY` and `GROQ_API_KEY` in `.env`.
-5. Run `python main.py` and open the printed local URL.
+This project is licensed under the terms specified in `LICENSE`.
