@@ -19,7 +19,7 @@ This project is designed with security, safety, and development best practices i
   - Natural language queries like “Show me the sales of April month” or “Show total revenue by customer”.
   - Read‑only queries only (`SELECT` / `WITH`), with strict validation and safety filters.
   - Hybrid mode:
-    - Hand‑crafted SQL templates (fallback) for key metrics (April sales, highest revenue product, monthly sales, total revenue).
+    - Hand‑crafted SQL templates (fallback) for key metrics (April sales, highest revenue product, sales by month, total revenue).
     - Groq LLM (`llama-3.3-70b-versatile`) for ad‑hoc, exploratory SQL questions (`Mode: groq`). [file:1][web:68][web:29]
 
 - **RAG / Knowledge Agent**
@@ -81,11 +81,11 @@ sequenceDiagram
     M->>S: Forward question
     S->>S: Check fallback patterns
     alt Matches fallback
-        S->>DB: Run hand‑crafted SQL (read‑only)
+        S->>DB: Run hand-crafted SQL (read-only)
         DB-->>S: Result rows
         S->>U: Table + explanation (Mode: fallback)
     else No fallback match
-        S->>G: Chat completion\n(model=llama-3.3-70b-versatile)
+        S->>G: Chat completion (llama-3.3-70b-versatile)
         G-->>S: Generated SQL
         S->>S: validate_safe_sql()
         S->>DB: Run query
@@ -111,7 +111,7 @@ sequenceDiagram
     U->>M: "How many casual leaves can an employee take?"
     M->>K: Forward question
     K->>PDF: Ensure PDFs are processed
-    K->>V: Retrieve top‑K relevant chunks
+    K->>V: Retrieve top-K relevant chunks
     V-->>K: Relevant text segments
     K->>U: Answer + citations (document, page)
 ```
@@ -138,7 +138,7 @@ Create a `docs/images/` folder and add UI screenshots, then reference them like:
 
 ```
 
-These will help your reviewer quickly understand how the app looks and behaves. [web:79][web:83]
+These will help reviewers quickly understand how the app looks and behaves. [web:79][web:83]
 
 ---
 
@@ -196,7 +196,7 @@ For a more production‑grade setup, reviewers could:
 - RAG answers:
 
   - Always include citations (document + page).
-  - Are based on retrieved text from the PDFs and not arbitrary hallucinations. [file:1]
+  - Are based on retrieved text from the PDFs, not arbitrary hallucinations. [file:1]
 
 ### Error Handling and Logging
 
