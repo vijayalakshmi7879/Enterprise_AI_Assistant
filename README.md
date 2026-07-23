@@ -1,5 +1,6 @@
 # Enterprise AI Assistant
 
+## Overview:
 An end‑to‑end AI assistant for enterprise use cases combining:
 
 - A **SQL Agent** that converts natural language questions into safe PostgreSQL queries.
@@ -9,6 +10,10 @@ An end‑to‑end AI assistant for enterprise use cases combining:
 Repo: https://github.com/vijayalakshmi7879/Enterprise_AI_Assistant
 
 This project is designed with security, safety, and development best practices in mind, suitable for code review and extension.
+
+## Application Preview
+
+[▶ Watch the demo video](docs/videos/enterprise-ai-assistant-demo.mp4)
 
 ---
 
