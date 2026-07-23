@@ -15,6 +15,8 @@ This project is designed with security, safety, and development best practices i
 
 [▶ Watch the demo video](docs/videos/enterprise-ai-assistant-demo.mp4)
 
+Note: if you want to watch the video click on the above link and it takes you to the video. click on open raw and then it will download to your local machine then you can view it through browser.
+
 ---
 
 ## Features
