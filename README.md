@@ -60,7 +60,6 @@ flowchart LR
         D
     end
 ```
-
 - **Manager Agent** decides whether a query is better answered from structured sales data or from policy documents.
 - **SQL Agent** generates safe SQL, runs it against PostgreSQL, and explains results.
 - **Knowledge Agent** retrieves relevant PDF chunks from the vector store and synthesizes answers with citations. [file:1][web:81][web:75]
