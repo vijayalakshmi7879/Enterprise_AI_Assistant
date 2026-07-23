@@ -38,15 +38,13 @@ This project is designed with security, safety, and development best practices i
 
 ```mermaid
 flowchart LR
-    U[User in Gradio UI] --> M[Manager Agent]
-
+    U[User] --> M[Manager Agent]
     M -->|Sales / data questions| S[SQL Agent]
     M -->|Policy / document questions| K[Knowledge Agent (RAG)]
-
-    S --> P[PostgreSQL\nproducts/customers/sales]
-    K --> V[Chroma Vector DB\n(vectordb/)]
-    K --> D[Uploaded PDFs\n(uploaded_pdfs/)]
-
+    S --> P[PostgreSQL]
+    K --> V[Chroma Vector DB]
+    K --> D[Uploaded PDFs]
+```
     subgraph App
         M
         S
