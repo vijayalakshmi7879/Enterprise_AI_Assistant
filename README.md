@@ -51,7 +51,7 @@ flowchart LR
 
     subgraph DataLayer
         V[Chroma Vector DB]
-        D[SQLite DB]
+        D[PostgreSQL]
         F[Uploaded PDFs]
     end
 
