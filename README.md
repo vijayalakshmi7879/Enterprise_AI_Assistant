@@ -34,22 +34,45 @@ This project is designed with security, safety, and development best practices i
 
 ---
 
-## High‑Level Architecture
+### High‑level System Diagram
 
 ```mermaid
 flowchart LR
-    U[User] --> M[Manager Agent]
-    M --> S[SQL Agent]
-    M --> K[Knowledge Agent (RAG)]
-    S --> P[PostgreSQL]
-    K --> V[Chroma Vector DB]
-    K --> D[Uploaded PDFs]
-```
-- **Manager Agent** decides whether a query is better answered from structured sales data or from policy documents.
-- **SQL Agent** generates safe SQL, runs it against PostgreSQL, and explains results.
-- **Knowledge Agent** retrieves relevant PDF chunks from the vector store and synthesizes answers with citations. [file:1][web:81][web:75]
+    subgraph Client
+        U[User Browser]
+    end
 
----
+    subgraph Colab
+        G[Gradio UI]
+        M[Manager Agent Router]
+        R[RAG Agent and Tools]
+        S[SQL Agent]
+    end
+
+    subgraph DataLayer
+        V[Chroma Vector DB]
+        D[SQLite DB]
+        F[Uploaded PDFs]
+    end
+
+    subgraph ExternalLLMs
+        GE[Gemini API]
+        GR[Groq API]
+    end
+
+    U --> G
+    G --> M
+
+    M --> R
+    M --> S
+
+    R --> V
+    R --> GE
+    R --> F
+
+    S --> D
+    S --> GR
+```
 
 ## SQL Agent Flow
 
