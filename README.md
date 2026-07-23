@@ -140,20 +140,18 @@ Create a `docs/images/` folder and add UI screenshots, then reference them like:
 
 ### Gradio Chat UI
 
-[![Gradio Chat UI](docs/images/gradio-chat-ui.png)](docs/images/gradio-chat-ui.png)
+[View Gradio Chat UI screenshot](docs/images/gradio-chat-ui.png)
 
 ### SQL Agent April Sales
 
-[![SQL Agent April Sales](docs/images/sql-agent-april-sales-screen1.png)](docs/images/sql-agent-april-sales-screen1.png)
-
-[![SQL Agent April Sales](docs/images/sql-agent-april-sales-screen2.png)](docs/images/sql-agent-april-sales-screen2.png)
+[View SQL Agent April Sales screenshot 1](docs/images/sql-agent-april-sales-screen1.png)  
+[View SQL Agent April Sales screenshot 2](docs/images/sql-agent-april-sales-screen2.png)
 
 ### Knowledge Agent HR Policy
 
-[![Knowledge Agent HR Policy](docs/images/knowledge-agent-hr-policy-casualleaves.png)](docs/images/knowledge-agent-hr-policy-casualleaves.png)
+[View Knowledge Agent HR Policy screenshot](docs/images/knowledge-agent-hr-policy-casualleaves.png)
 
 These will help reviewers quickly understand how the app looks and behaves.
-
 ---
 
 ## Security, Safety, and Development Practices
